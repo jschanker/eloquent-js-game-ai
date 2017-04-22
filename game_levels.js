@@ -1,4 +1,12 @@
 var GAME_LEVELS = [
+  ["                               ",
+   "                               ",
+   "                               ",
+   "                               ",
+   "                               ",
+   "               x               ",
+   "@              x       o       ",
+   "xxxxxxxxxx!!!!!x!!!!!xxxxxxxxxx"],
   ["                                                                                ",
    "                                                                                ",
    "                                                                                ",
