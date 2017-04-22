@@ -304,7 +304,7 @@ function trackKeys(codes) {
     if (codes.hasOwnProperty(event.keyCode)) {
       var down = event.type == "keydown";
       pressed[codes[event.keyCode]] = down;
-      event.preventDefault();
+      //event.preventDefault();
     }
   }
   addEventListener("keydown", handler);

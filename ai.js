@@ -192,30 +192,16 @@
       "                      "
 	];
     
-    var testLevel = new Level(testLevelPlan);
-    var waitSeq = [{}, {}, {}, {}, {}, {}, {}, {}];
-    for(var c = 0; c < 4; c++) {
-    	waitSeq = waitSeq.concat(waitSeq);
+    function repeatAI(testLevel, maxMoves, moveDuration) {
+        moveTransitionStep = moveDuration;
+        var aiMoveSeq = bestStrategy(testLevel, maxMoves);
+        console.log(aiMoveSeq);
+        console.log(memoCount, callCount);
+        function loopAIRun() {
+            var testLevelCp = testLevel.copy();
+            runAILevel(testLevelCp, aiMoveSeq, CanvasDisplay, loopAIRun);
+        }
+        loopAIRun();
     }
-    var aiSeq = bestStrategy(testLevel, 30);
-    var aiMoveSeq = waitSeq.slice();
-    aiMoveSeq = [];
-    //alert(aiSeq[0] instanceof Array);
-    for(var d = 0; d < aiSeq.length; d++) {
-      for(var e = 0; e < 1; e++) {
-        aiMoveSeq.push(aiSeq[d]);
-      }
-    }
-    console.log(aiSeq);
-    console.log(memoCount, callCount);
-    //setTimeout(function() {
-    var repeatC = 2;
-    function repeatAI() {
-      //if(repeatC > 0) {
-        var testLevelCp = testLevel.copy();
-        runAILevel(testLevelCp, aiMoveSeq, CanvasDisplay, repeatAI);
-      //  repeatC--;
-      //}
-    }
-    //}, 1000);
+
     //runGame(GAME_LEVELS, CanvasDisplay);

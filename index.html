@@ -6,10 +6,82 @@
     <script src="game_levels.js"></script>
     <script src="canvas.js"></script>
     <script src="ai.js"></script>
+    <style>
+    body {
+      font-family: verdana, arial, sans-serif;
+    }
+    </style>
   </head>
   <body>
+  <h1>AI to Beat Your Own Custom-Made Level</h1>
+  <p>
+  <strong>Instructions</strong>: Use <code>o</code> for coin, <code>=</code> for horizontally moving lava, <code>v</code> for vertically moving lava, <code>!</code> for stationary lava, <code>x</code> for a wall, and <code>@</code> for the player.  The AI tries all necessary possible move combinations of up to max moves and selects the shortest one.  By increasing the search depth, the likelihood of finding a way to beat the level increases at the expense of more time waiting for a solution.  The move duration is the amount of time it spends for each move; in determining its strategy, it can only change from say Up-Right to Right after that interval of time.  Decreasing this number can potentially increase accuracy (e.g., less likely to crash into lava or miss a coin) at the expense of being able to search through more of the level.
+  </p>
+  <div>
+    <textarea id = "level-plan" rows = "10" cols = "50" style = "font-family: monospace;"></textarea>
+  </div>
+  <div>
+    <button id = "three-coin-sample">Three Coin Sample</button>
+    <button id = "climb-the-tower">Climb The Tower (Warning: Takes Time!)</button>
+  </div>
+  <div>
+    Max moves (1-32): <INPUT TYPE = "NUMBER" MIN = "1" MAX = "32" ID = "max-moves" VALUE = "30"></INPUT>
+    Move Duration (0.01 - 0.5): <INPUT ID = "move-duration" VALUE = "0.15"></INPUT>
+  </div>
+  <div>
+    <button id = "run-ai">Have AI Attempt to Conquer Level!</button>
+  </div>
     <script>
-      repeatAI();
+      document.getElementById("level-plan").value = testLevelPlan.join("\n");
+      document.getElementById("three-coin-sample").addEventListener("click", function() {
+        document.getElementById("level-plan").value = testLevelPlan.join("\n");
+        document.getElementById("max-moves").value = 30;
+        document.getElementById("move-duration").value = 0.15;
+      });
+      document.getElementById("climb-the-tower").addEventListener("click", function() {
+        document.getElementById("level-plan").value = 
+        [
+         "             ",
+         "             ",             
+         "           o ",
+         "             ",
+         "           x ",
+         "           x ",
+         "           x ",
+         "           xo",
+         "          xxx",
+         "          x x",
+         "          x x",
+         "         oxxx",
+         "         x  x",
+         "         x  x",
+         "        ox  x",
+         "        xx  x",
+         "         x  x",
+         "         x  x",
+         "         x  x",
+         "        xx  x",
+         "         x  x",
+         "         x  x",
+         "         x  x",
+         "        xx  x",
+         "  @      x  x",
+         "  x   x  x  x",
+         "xxx xxx xxx x",
+         "!!!!!!!!!!!!!!"
+         ].join("\n");
+         document.getElementById("max-moves").value = 27;
+         document.getElementById("move-duration").value = 0.2;
+        });
+      document.getElementById("run-ai").addEventListener("click", function() {
+        var maxMoves = parseInt(document.getElementById("max-moves").value);
+        if(!maxMoves || maxMoves < 0 || maxMoves > 32) { maxMoves = 10; }
+        var moveDuration = parseFloat(document.getElementById("move-duration").value);
+        if(!moveDuration || moveDuration < 0.1 || moveDuration > 0.5) { moveDuration = 0.15; }
+        var testLevelPlan = document.getElementById("level-plan").value.split("\n");
+        var testLevel = new Level(testLevelPlan);
+        repeatAI(testLevel, maxMoves, moveDuration);
+      });
     </script>
   </body>
 </html>
