@@ -182,7 +182,7 @@
     }
     var testLevelPlan = [
       "                      ",
-      "        o             ",
+      "  o     o             ",
       "  x =              x  ",
       "  x   xxx   ox x   x  ",
       "  x @ xx   xxxxx   x  ",
@@ -209,8 +209,13 @@
     console.log(aiSeq);
     console.log(memoCount, callCount);
     //setTimeout(function() {
+    var repeatC = 2;
     function repeatAI() {
-      runAILevel(testLevel, aiMoveSeq, CanvasDisplay);
+      //if(repeatC > 0) {
+        var testLevelCp = testLevel.copy();
+        runAILevel(testLevelCp, aiMoveSeq, CanvasDisplay, repeatAI);
+      //  repeatC--;
+      //}
     }
     //}, 1000);
     //runGame(GAME_LEVELS, CanvasDisplay);
