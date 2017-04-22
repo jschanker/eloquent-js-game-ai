@@ -1,13 +1,16 @@
-
     function resetLevel(n) {
       return new Level(n);
     }
     
     function runAILevel(level, moveSeq, Display, andThen) {
       var display = new Display(document.body, level);
-      var currentMoveIndex = 0;
+      //var currentMoveIndex = 0;
+      var totalSeconds = 0;
       
       runAnimation(function(step) {
+        var currentMoveIndex = Math.floor(totalSeconds/moveTransitionStep);
+        //console.log(totalSeconds, currentMoveIndex, step);
+        totalSeconds += step;
         if(currentMoveIndex < moveSeq.length) {
           arrows = moveSeq[currentMoveIndex];
           currentMoveIndex++;
@@ -31,6 +34,15 @@
       vectorCp.y = this.y;
       
       return vectorCp;
+    };
+    
+    Vector.prototype.round = function(n) {
+      if(typeof n !== "number") {
+        n = 0;
+      }
+      var pow = Math.pow(10,n);
+      this.x = Math.round(this.x*pow)/pow;
+      this.y = Math.round(this.y*pow)/pow;
     }
     
     Player.prototype.copy = function() {
@@ -40,7 +52,7 @@
       playerCp.speed = this.speed.copy();
       
       return playerCp;
-    }
+    };
     
     Lava.prototype.copy = function() {
       lavaCp = Object.create(Lava.prototype);
@@ -51,7 +63,7 @@
       lavaCp.repeatPos = this.repeatPos ? this.repeatPos.copy() : this.repeatPos;
       
       return lavaCp;
-    }
+    };
     
     Coin.prototype.copy = function() {
       coinCp = Object.create(Coin.prototype);
@@ -62,7 +74,7 @@
       coinCp.wobble = this.wobble;
       
       return coinCp;
-    }
+    };
     
     Level.prototype.copy = function() {
       levelCp = Object.create(Level.prototype);
@@ -88,18 +100,40 @@
       levelCp.status = this.status;
       
       return levelCp;
-    }
+    };
     
-    memo = {};
-    movesList = [{up: true}, 
-                 {right: true}, 
-                 {left: true}, 
-                 {up: true, right: true},
-                 {up: true, left: true},
-                 {}
-                ];
+    Level.prototype.toKeyString = function() {
+      var levelRoundedActorPositions = this.copy();
+      var numOfActors = levelRoundedActorPositions.actors.forEach(function(actor) {
+        for(key in actor) {
+          //actor[key] = Math.round(actor[key]*100)/100;
+          if(actor[key] instanceof Vector) {
+            actor[key].round();
+          }
+          else if(typeof key === "number") {
+            actor[key] = actor[key].round();
+          }
+        }
+      });
+      
+      return JSON.stringify(levelRoundedActorPositions);
+    };
+    
+    var moveTransitionStep = 0.15;
+    var memo = {};
+    var movesList = [{up: true}, 
+                     {right: true}, 
+                     {left: true}, 
+                     {up: true, right: true},
+                     {up: true, left: true},
+                     {}
+                    ];
+                    
+    var memoCount = 0;
+    var callCount = 0;
     
     function bestStrategy(level, maxMoves) {
+      callCount++;
       if(level.status === "lost") {
         return -1;
       }
@@ -111,8 +145,11 @@
       }
       else {
         var moveSeq;
-        var key = JSON.stringify(level) + maxMoves;
+        //var roundedLevel = level.copy();
+        
+        var key = JSON.stringify(level.toKeyString()) + maxMoves;
         if(key in memo) {
+          memoCount++;
           moveSeq = memo[key];
         } else {
           moveSeq = movesList.reduce(function(acc, move) {
@@ -120,7 +157,7 @@
             //console.log(level.actors.filter(function(p) { return p instanceof Coin }));
             //console.log(level.player);
             var levelCp = level.copy();
-            levelCp.animate(2, move);
+            levelCp.animate(moveTransitionStep, move);
             var moveSeqOpt = bestStrategy(levelCp, maxMoves-1);
             if(!(acc instanceof Array)) {
               if(moveSeqOpt instanceof Array) {
@@ -145,10 +182,10 @@
     }
     var testLevelPlan = [
       "                      ",
-      "                      ",
-      "  x              = x  ",
-      "  x   o     x x    x  ",
-      "  x @ x    xxxxx   x  ",
+      "        o             ",
+      "  x =              x  ",
+      "  x   xxx   ox x   x  ",
+      "  x @ xx   xxxxx   x  ",
       "  xxxxx            x  ",
       "      x!!!!!!!!!!!!x  ",
       "      xxxxxxxxxxxxxx  ",
@@ -160,15 +197,17 @@
     for(var c = 0; c < 4; c++) {
     	waitSeq = waitSeq.concat(waitSeq);
     }
-    var aiSeq = bestStrategy(testLevel, 4);
+    var aiSeq = bestStrategy(testLevel, 30);
     var aiMoveSeq = waitSeq.slice();
     aiMoveSeq = [];
+    //alert(aiSeq[0] instanceof Array);
     for(var d = 0; d < aiSeq.length; d++) {
-      for(var e = 0; e < 7; e++) {
+      for(var e = 0; e < 1; e++) {
         aiMoveSeq.push(aiSeq[d]);
       }
     }
     console.log(aiSeq);
+    console.log(memoCount, callCount);
     //setTimeout(function() {
     function repeatAI() {
       runAILevel(testLevel, aiMoveSeq, CanvasDisplay);
